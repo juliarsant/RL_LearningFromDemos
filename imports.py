@@ -1,3 +1,11 @@
+"""
+Julia Santaniello
+Started: 06/01/23
+Last Updated: 12/21/23
+
+Variables used throughout the program.
+"""
+
 episodes = 1000
 steps = 200
 trials = 5

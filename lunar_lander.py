@@ -1,6 +1,12 @@
 __credits__ = ["Andrea PIERRÉ"]
 '''
-Implementation of the Lunar Lander game
+"""
+Modified By: Julia Santaniello
+Started: 06/01/23
+Last Updated: 12/21/23
+
+Implementation of the Lunar Lander game. Modified to move the flags every episode.
+Seeds changed to match Super class and this file for demonstration-matching purposes.
 '''
 
 import math

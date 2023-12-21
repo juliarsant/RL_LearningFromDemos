@@ -1,6 +1,8 @@
 Human-In-The-Loop Reinforcement Learning
+By: Julia Santaniello
 
-This program runs a Policy Gradient algorithm, and a modified HITL PG algorithm to learn Lunar Lander.
+This program runs a vanilla Policy Gradient algorithm, and a modified HITL PG algorithm to learn Lunar Lander.
+
 Be prepared to Press "Enter" and play Lunar Lander if demonstrating. Lunar Lander has 4 discrete actions: Up, Down, Left-Engine, Right-Engine. These will be the respective arrow keys.
 
 TO RUN:

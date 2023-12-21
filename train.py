@@ -1,8 +1,9 @@
 """
 Julia Santaniello
-06/25/23
+Started: 06/06/23
+Last Updated: 12/21/23
 
-For training a single policy. Input hyperparamters and saved policy name.
+For training a single vanilla policy. Input hyperparamters and saved policy name.
 """
 import numpy as np
 import time
@@ -18,6 +19,9 @@ env = LunarLander()
 demo_name="train"
 "Train an agent without demonstration"
 
+"""
+Starts training by initially preparing user to play
+"""
 def start():
     input("Press Enter to Start Demonstrations: ")
     print("Starting in 3...")
@@ -29,6 +33,10 @@ def start():
     print("Start!")
     print("")
 
+
+"""
+main function of hitl_train
+"""
 def run_train(trials):
     # start()
     # demo.main(demo_name)
@@ -50,7 +58,9 @@ def run_train(trials):
     print("Done! Saving Data!")
     save_data(r, s, a)
 
-
+"""
+trains the agent with PG algorithm and preferred number of demonstrations
+"""
 def train():
     agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=10)
     agent.reset()
@@ -103,6 +113,10 @@ def train():
 
     return avg_rewards_past, avg_steps_past, avg_accuracy_past
 
+
+"""
+Saves training data to csv file
+"""
 def save_data(r,s,a):
     arr = np.asarray([r,s,a])
     df = pd.DataFrame(arr)

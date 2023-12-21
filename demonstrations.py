@@ -5,9 +5,21 @@ from lunar_lander import LunarLander
 import pickle
 from imports import demo_name_hitl, seed, steps, gamma, learning_rate, obs_size_values, num_actions,algorithm_name, env_name, episodes, num_demos
 
+"""
+Julia Santaniello
+Started: 06/01/23
+Last Updated: 12/21/23
+
+Saves demonstrations from human expert.
+"""
+
 policy = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=seed)
 env = LunarLander(render_mode="human")
 demo_name = demo_name_hitl
+
+"""
+Human can play the game in real time using these keys
+"""
 def human_play():
     pressed_keys = pygame.key.get_pressed()
     if env_name == "lunar lander":
@@ -23,6 +35,10 @@ def human_play():
             return 1
         return 0
 
+
+"""
+Only saves dmonstrations
+"""
 def demonstrations_only():
     demonstrations_dict = {"demo_name": demo_name, "algorithm": algorithm_name} #dictionary of demonstrations
     
@@ -77,7 +93,9 @@ def demonstrations_only():
 
     return demonstrations_dict
 
-
+"""
+Keeps demonstration in a python dictionary
+"""
 def save_demonstration(environment_name, steps, states, timestamps, actions, rewards, seed, environment_version):
     
     assert(len(rewards) == len(states) == len(timestamps) == len(actions))
@@ -95,7 +113,9 @@ def save_demonstration(environment_name, steps, states, timestamps, actions, rew
 
     return state_dict
 
-
+"""
+Can watch lunar lander play by itself through the saved demonstration
+"""
 def play_demonstrations(demo_name_):
     file = open('./data/demonstrations/{}.pickle'.format(demo_name_), 'rb')
     demo_dict = pickle.load(file)
@@ -116,10 +136,16 @@ def play_demonstrations(demo_name_):
             if done:
                 break
 
+"""
+Save to pickle file in Data/Demonstration folder
+"""
 def save_demo(demo, demo_name_):
     with open('./data/demonstrations/{}.pickle'.format(demo_name_), 'wb') as handle:
             pickle.dump(demo, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+"""
+Runs and saves demonstrations
+"""
 def main(demo_name_):
     demo = demonstrations_only()
     save_demo(demo, demo_name_)

@@ -1,9 +1,4 @@
-"""
-Julia Santaniello
-06/25/23
 
-For training a single policy. Input hyperparamters and saved policy name.
-"""
 import numpy as np
 import time
 from PIL import Image
@@ -17,9 +12,20 @@ import matplotlib.pyplot as plt
 import csv
 from imports import demo_name_hitl, seed, steps, gamma, learning_rate, obs_size_values, num_actions,algorithm_name, env_name, episodes, num_demos, trials
 
+
+"""
+Julia Santaniello
+Started: 06/01/23
+Last Updated: 12/21/23
+
+For training a single humna-in-the-loop policy. Saves results in Data folder.
+"""
 env = LunarLander()
 demo_name = demo_name_hitl
 
+"""
+Starts training by initially preparing user to play
+"""
 def start():
     input("Press Enter to Start Demonstrations: ")
     print("Starting in 3...")
@@ -31,6 +37,9 @@ def start():
     print("Start!")
     print("")
 
+"""
+main function of hitl_train
+"""
 def run(trials):
     # start()
     # demo.main(demo_name)
@@ -51,12 +60,18 @@ def run(trials):
     a = np.asarray(a).mean(axis=0)
     save_data(r, s, a)
 
+
+"""
+Saves training data to csv file
+"""
 def save_data(r,s,a):
     arr = np.asarray([r,s,a])
     df = pd.DataFrame(arr)
     df.to_csv("./data/results/{}.csv".format(demo_name))
 
-        
+"""
+trains the agent with demonstrations and preferred number of demonstrations
+"""
 def train_with_demonstrations():
     with open('./data/demonstrations/{}.pickle'.format(demo_name), 'rb') as file:
         demo_dict = pickle.load(file)
@@ -133,28 +148,6 @@ def train_with_demonstrations():
     assert(len(avg_rewards_past)==len(avg_steps_past)==len(avg_accuracy_past))
 
     return avg_rewards_past, avg_steps_past, avg_accuracy_past
-
-
-"""
-Plots()
-Purpose: Plot policy trained with or without demonstrations
-Return: None; Print plots
-"""
-def plots(rewards_demos, rewards_no_demos):
-    num_demos = len(rewards_demos) - len(rewards_no_demos)
-
-    #X-axis
-    iterations = range(0,len(rewards_no_demos)*20,20)
-
-    #Plot
-    plt.plot(iterations, rewards_demos[num_demos:])
-    plt.plot(iterations, rewards_no_demos)
-    plt.ylabel("Average Return")
-    plt.xlabel("Iterations")
-    plt.legend(["With Human", "Without Human"])
-    plt.show()
-
-
         
 
 if __name__ == "__main__":

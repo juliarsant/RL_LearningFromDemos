@@ -8,6 +8,10 @@ from imports import data_folder_name, graph_path, demo_name, demo_name_hitl
 import pandas as pd
 
 '''
+Julia Santaniello
+Started: 06/01/23
+Last Updated: 12/21/23
+
 Graphs and saves data from experiments. Can choose the titles for the graph, axes, legends.
 Can save data by inserting an experiment code.
 '''

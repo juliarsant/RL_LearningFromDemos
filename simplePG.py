@@ -1,16 +1,14 @@
 import numpy as np
 import time
 
-# #from chainer import cuda
 
-# #import cupy as cp
+"""
+Julia Santaniello
+Started: 06/01/23
+Last Updated: 12/21/23
 
-# #backend
-# #be = "gpu"
-# #device = 0
-
-
-# be = "cpu"
+SimplePG: Vanilla Policy Gradient Algorithm. Includes functions for HITL-PG
+"""
 
 class SimplePG(object):
 	def __init__(self, num_actions, input_size, hidden_layer_size, learning_rate,gamma,decay_rate,greedy_e_epsilon,random_seed):
