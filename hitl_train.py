@@ -32,8 +32,8 @@ def start():
     print("")
 
 def run(trials):
-    # start()
-    # demo.main(demo_name)
+    start()
+    demo.main(demo_name)
     print("Thank you!")
     time.sleep(1)
     print("Starting agent training...")
