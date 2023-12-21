@@ -1,7 +1,7 @@
-episodes = 2000
+episodes = 1000
 steps = 200
 trials = 5
-gamma = 0.95
+gamma = 0.9
 learning_rate = 0.1
 greedy_e_epsilon = 0.1
 alpha = 0.1

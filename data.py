@@ -46,18 +46,18 @@ def plot():
 
     for i in range(len(data_train)):
 
-        plt.plot(x, data_hitl[i], color = color[0])
-        plt.plot(x, data_train[i], color = color[1])
+        plt.plot(x, data_hitl[i], color = color[1])
+        plt.plot(x, data_train[i], color = color[0])
     
         if i == 0:
             plt.title("Average Rewards over Episodes")
-            plt.legend(["PG", "PG-HITL"])
+            plt.legend(["PG-HITL", "PG"])
         elif i == 1:
             plt.title("Average Steps over Episodes")
-            plt.legend(["PG", "PG-HITL"])
+            plt.legend(["PG-HITL", "PG"])
         elif i == 2:
             plt.title("Averages over Episodes")
-            plt.legend(["PG", "PG-HITL"])
+            plt.legend(["PG-HITL", "PG"])
 
         plt.show()
 

@@ -207,8 +207,9 @@ class SimplePG(object):
 
 		if human_demonstration:
 			human_actions = np.vstack(self.h_actions)
+			human_rewards = np.vstack(self.h_rewards)
 		
-		self.past_states,self.past_hidden_states,self._dlogps,self.past_rewards, self.h_actions, self.a_probs = [],[],[],[],[],[] # reset array memory
+		self.past_states,self.past_hidden_states,self._dlogps,self.past_rewards, self.h_actions, self.a_probs, self.h_rewards = [],[],[],[],[],[],[] # reset array memory
 
 		#compute the discounted reward backwards through time
 		discounted_epr = (self.discount_rewards(epr))
@@ -228,9 +229,10 @@ class SimplePG(object):
 			scores = self.human_robot_agreement_score(agent_actions, human_actions, 4)
 			discounted_scores = self.discount_rewards(scores)
 			discounted_score_mean = np.mean(discounted_scores)
-			discounted_score_diff = np.subtract(scores,discounted_score_mean)
-			discounted_score_diff /= np.std(scores)
-			epdlogp *= (discounted_score_diff+discounted_epr_diff)/2 # modulate the gradient with advantage (PG magic happens right here.)
+			discounted_score_diff = np.subtract(discounted_scores,discounted_score_mean)
+			discounted_score_diff /= np.std(discounted_scores)
+
+			epdlogp *=  discounted_score_diff # modulate the gradient with advantage (PG magic happens right here.)
 
         #gradient over batch
 		grad = self.policy_backward(hs_stack, epdlogp)

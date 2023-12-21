@@ -32,8 +32,8 @@ def start():
     print("")
 
 def run(trials):
-    start()
-    demo.main(demo_name)
+    # start()
+    # demo.main(demo_name)
     print("Thank you!")
     time.sleep(1)
     print("Starting agent training...")
@@ -64,7 +64,7 @@ def train_with_demonstrations():
     file.close()
     env = LunarLander()
     agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=10)
-
+    agent.reset()
 
     demo_eps = len(demo_dict)-2
 
@@ -86,16 +86,23 @@ def train_with_demonstrations():
 
         for j in range(steps):
             #pick an action
+            action = agent.pickAction(state, exploring=True)
+            action_robot = action
+
             if i < num_demos:
                 human_action = demo_dict[i]["actions"][j]
                 agent.save_human_action(human_action)
                 human_reward = demo_dict[i]["rewards"][j]
                 human_state = demo_dict[i]["states"][j]
                 agent.saveHumanStep(state=human_state, reward=human_reward, action=human_action)
-
-            action = agent.pickAction(state, exploring=True)
+                action = human_action
+            
             next_state, reward, done, win= env.step(action)
-            agent.saveStep(state=state, reward=reward, action=action, next_state=next_state, done=done)
+
+            if j == steps -1:
+                reward = -100
+
+            agent.saveStep(state=state, reward=reward, action=action_robot, next_state=next_state, done=done)
 
             episode_reward += reward
             state = next_state
