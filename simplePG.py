@@ -256,7 +256,7 @@ class SimplePG(object):
 			score = 0
 			for j in range(num_actions):
 				if a_human[i][j] == 1.0:
-					score += 1.0 - abs(a_human[i][j] - a_robot[i][j])
+					score += a_human[i][j] - abs(a_robot[i][j])
 				else:
 					score += -1 * a_human[i][j]
 			score_list.append(score)
