@@ -7,9 +7,9 @@ Variables used throughout the program.
 """
 
 episodes = 1000
-steps = 200
+steps = 300
 trials = 5
-gamma = 0.9
+gamma = 0.99
 learning_rate = 0.1
 greedy_e_epsilon = 0.1
 alpha = 0.1

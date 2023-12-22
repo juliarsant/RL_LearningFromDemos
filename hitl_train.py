@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import csv
 from imports import demo_name_hitl, seed, steps, gamma, learning_rate, obs_size_values, num_actions,algorithm_name, env_name, episodes, num_demos, trials
 
-agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=seed)
 
 """
 Julia Santaniello
@@ -79,7 +78,8 @@ def train_with_demonstrations():
 
     file.close()
     env = LunarLander()
-    agent.reset()
+    agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=10)
+    
 
     demo_eps = len(demo_dict)-2
 

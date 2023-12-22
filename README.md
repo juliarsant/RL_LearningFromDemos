@@ -1,5 +1,5 @@
 Human-In-The-Loop Reinforcement Learning
-By: Julia Santaniello
+By: Julia Santaniello and Iris Yang
 
 This program runs a vanilla Policy Gradient algorithm, and a modified HITL PG algorithm to learn Lunar Lander.
 

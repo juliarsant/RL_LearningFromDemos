@@ -151,5 +151,5 @@ def main(demo_name_):
     save_demo(demo, demo_name_)
 
 if __name__=="__main__":
-    main(demo_name)
-    #play_demonstrations(demo_name)
+    #main(demo_name)
+    play_demonstrations(demo_name)

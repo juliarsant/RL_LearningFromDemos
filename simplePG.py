@@ -205,7 +205,6 @@ class SimplePG(object):
 
 		if human_demonstration:
 			human_actions = np.vstack(self.h_actions)
-			human_rewards = np.vstack(self.h_rewards)
 		
 		self.past_states,self.past_hidden_states,self._dlogps,self.past_rewards, self.h_actions, self.a_probs, self.h_rewards = [],[],[],[],[],[],[] # reset array memory
 
@@ -254,10 +253,9 @@ class SimplePG(object):
 
 		for i in range(len(a_robot)):
 			score = 0
-			x = np.argmax(a_robot[i])
 			for j in range(num_actions):
 				if a_human[i][j] == 1.0:
-					score += a_human[i][j] - abs(a_robot[i][j])
+					score += 1.0 - abs(a_robot[i][j])
 				else:
 					score += 0
 			score_list.append(score)

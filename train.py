@@ -15,7 +15,6 @@ from simplePG import SimplePG
 from lunar_lander import LunarLander
 from imports import demo_name, seed, steps, gamma, learning_rate, obs_size_values, num_actions,algorithm_name, env_name, episodes
 
-agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=seed)
 
 env = LunarLander()
 demo_name="train"
@@ -64,7 +63,7 @@ def run_train(trials):
 trains the agent with PG algorithm and preferred number of demonstrations
 """
 def train():
-    agent.reset()
+    agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=10)
     
     avg_rewards_past, avg_steps_past, avg_accuracy_past = [],[],[]
     state = env.reset(seed=10)
