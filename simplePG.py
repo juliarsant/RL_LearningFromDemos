@@ -254,11 +254,12 @@ class SimplePG(object):
 
 		for i in range(len(a_robot)):
 			score = 0
+			x = np.argmax(a_robot[i])
 			for j in range(num_actions):
 				if a_human[i][j] == 1.0:
 					score += a_human[i][j] - abs(a_robot[i][j])
 				else:
-					score += -1 * a_human[i][j]
+					score += 0
 			score_list.append(score)
 
 		return np.vstack(score_list)
