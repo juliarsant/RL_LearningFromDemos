@@ -40,18 +40,18 @@ if TYPE_CHECKING:
 
 FPS = 50
 #MODIFIED: FROM 30 to 25
-SCALE = 30.0  # affects how fast-paced the game is, forces should be adjusted as well
+SCALE = 25.0  # affects how fast-paced the game is, forces should be adjusted as well
 
-MAIN_ENGINE_POWER = 13.0
+MAIN_ENGINE_POWER = 16.0
 SIDE_ENGINE_POWER = 0.6
 
-INITIAL_RANDOM = 900.0  # Set 1500 to make game harder
+INITIAL_RANDOM = 500.0  # Set 1500 to make game harder
 
 LANDER_POLY = [(-14, +17), (-17, 0), (-17, -10), (+17, -10), (+17, 0), (+14, +17)]
 LEG_AWAY = 20
 LEG_DOWN = 18
 LEG_W, LEG_H = 2, 8
-LEG_SPRING_TORQUE = 40
+LEG_SPRING_TORQUE = 100
 
 SIDE_ENGINE_HEIGHT = 14.0
 SIDE_ENGINE_AWAY = 12.0
@@ -67,6 +67,8 @@ class ContactDetector(contactListener):
         self.env.landed = False
 
     def BeginContact(self, contact):
+        # print(contact.fixtureA) 
+        # print(contact.fixtureB)
         if (
             self.env.lander == contact.fixtureA.body
             or self.env.lander == contact.fixtureB.body
@@ -214,9 +216,9 @@ class LunarLander(gym.Env, EzPickle):
         self,
         render_mode: Optional[str] = None,
         continuous: bool = False,
-        gravity: float = -10.0,
+        gravity: float = -9.0, #-10
         enable_wind: bool = False,
-        wind_power: float = 15.0,
+        wind_power: float = 15.0, 
         turbulence_power: float = 1.5,
     ):
         EzPickle.__init__(
@@ -254,8 +256,8 @@ class LunarLander(gym.Env, EzPickle):
         self.turbulence_power = turbulence_power
 
         self.enable_wind = enable_wind
-        self.wind_idx = np.random.randint(-9999, 9999)
-        self.torque_idx = np.random.randint(-9999, 9999)
+        self.wind_idx = np.random.randint(-6000, 6000)
+        self.torque_idx = np.random.randint(-6000, 6000)
 
         self.screen: pygame.Surface = None
         self.clock = None
@@ -345,26 +347,28 @@ class LunarLander(gym.Env, EzPickle):
         W = VIEWPORT_W / SCALE
         H = VIEWPORT_H / SCALE
 
+
+
         # terrain
         CHUNKS = 11
         height = self.np_random.uniform(0, H / 2, size=(CHUNKS + 1,))
         chunk_x = [W / (CHUNKS - 1) * i for i in range(CHUNKS)]
-        rand_chunk = random.randint(1, CHUNKS-4)
-        self.x_pos_middle_landing = chunk_x[rand_chunk + 1]
-        self.helipad_x1 = chunk_x[rand_chunk]
-        self.helipad_x2 = chunk_x[rand_chunk + 2]
+        self.rand_chunk = random.randint(1, CHUNKS-4)
+        self.x_pos_middle_landing = chunk_x[self.rand_chunk + 1]
+        self.helipad_x1 = chunk_x[self.rand_chunk]
+        self.helipad_x2 = chunk_x[self.rand_chunk + 2]
 
         #MODIFIED (REMOVED)
         self.helipad_y = H/4
-        height[rand_chunk] = self.helipad_y 
-        height[rand_chunk + 1] = self.helipad_y
-        height[rand_chunk + 2] = self.helipad_y
+        height[self.rand_chunk] = self.helipad_y 
+        height[self.rand_chunk + 1] = self.helipad_y
+        height[self.rand_chunk + 2] = self.helipad_y
 
-        edge = rand_chunk + 2
+        edge = self.rand_chunk + 2
 
         smooth_y = []
         for i in range(CHUNKS):
-            if i > rand_chunk and i <= edge:
+            if i > self.rand_chunk and i <= edge:
                 new_y = smooth_y[-1]
             else:
                 new_y = 0.33 * (height[i-1] + height[i + 0] + height[i+1])
@@ -392,7 +396,7 @@ class LunarLander(gym.Env, EzPickle):
                 shape=polygonShape(
                     vertices=[(x / SCALE, y / SCALE) for x, y in LANDER_POLY]
                 ),
-                density=5.0,
+                density=3.5,
                 friction=0.1,
                 categoryBits=0x0010,
                 maskBits=0x001,  # collide only with ground
@@ -531,7 +535,7 @@ class LunarLander(gym.Env, EzPickle):
         ):
             # Main engine
             if self.continuous:
-                m_power = (np.clip(action[0], 0.0, 1.0) + 1.0) * 0.5  # 0.5..1.0
+                m_power = (np.clip(action[0], 0.0, 1.0) + 1.0) * 1.0  # 0.5..1.0
                 assert m_power >= 0.5 and m_power <= 1.0
             else:
                 m_power = 1.0
@@ -597,7 +601,7 @@ class LunarLander(gym.Env, EzPickle):
   
         state = [
             (pos.x - VIEWPORT_W / SCALE / 2) / (VIEWPORT_W / SCALE / 2),
-            (pos.y - (self.helipad_y + LEG_DOWN / SCALE)) / (VIEWPORT_H / SCALE / 2),
+            (pos.y - VIEWPORT_H / SCALE / 2) / (VIEWPORT_H / SCALE / 2),
             vel.x * (VIEWPORT_W / SCALE / 2) / FPS,
             vel.y * (VIEWPORT_H / SCALE / 2) / FPS,
             self.lander.angle,
@@ -606,40 +610,40 @@ class LunarLander(gym.Env, EzPickle):
             1.0 if self.legs[1].ground_contact else 0.0,
             (self.x_pos_middle_landing - VIEWPORT_W/SCALE/2) / (VIEWPORT_W/SCALE/2),
             (pos.x - VIEWPORT_W / SCALE / 2) / (VIEWPORT_W / SCALE / 2) - (self.x_pos_middle_landing - VIEWPORT_W/SCALE/2) / (VIEWPORT_W/SCALE/2),
-            (pos.y - (self.helipad_y + LEG_DOWN / SCALE)) / (VIEWPORT_H / SCALE / 2) - (self.helipad_y + LEG_DOWN / SCALE) / (VIEWPORT_H/SCALE/2),
+            self.sky_polys[self.rand_chunk][0][1] - (pos.y - LEG_DOWN/SCALE)
         ]
+        
         assert len(state) == 11
+
 
         #print(f"positionx {pos.x}, posy {pos.y}, heli {self.helipad_y + LEG_DOWN/SCALE}, state0 {state[0]}, state8 {state[8]}, state1 {state[1]}")
         #Scaled locations of the flags on the x axis
         x_left = (self.helipad_x1 - VIEWPORT_W/SCALE/2) / (VIEWPORT_W/SCALE/2)
         x_right = (self.helipad_x2 - VIEWPORT_W/SCALE/2) / (VIEWPORT_W/SCALE/2)
 
-        #dy and dx of the lander and the helipad
-        dx = (state[0] - state[8]) #Shoudlnt go above +2 or below -2, distance on the x axis from landing pad
-        # dy = state[10]
-
         #Rewards & shaping
         reward = 0
 
-        if (state[6] + state[7]) == 2.0:
-            legs = 2
-        else:
-            legs = 0
         #ORIGINAL
         #Distance from helipad, velocity magnitude, upright position score and whether both legs touched the ground
-        shaping = \
-        - 100*np.sqrt((state[0]-state[8])*(state[0]-state[8]) + state[1]*state[1]) \
-        - 100*np.sqrt(state[2]*state[2] + state[3]*state[3]) \
-        - 100*abs(state[4]) + 10*state[6] + 10*state[7]  # And ten points for both legs contact
-
+        reward = 0
+        shaping = (
+            -100 * np.sqrt(abs(state[8]))
+            - 100 * np.sqrt(abs(state[9]))
+            - 100 * abs(state[4])
+            + 10 * state[6]
+            + 10 * state[7]
+        )  # And ten points for legs contact, the idea is if you
+        # lose contact again after landing, you get negative reward
         if self.prev_shaping is not None:
             reward = shaping - self.prev_shaping
         self.prev_shaping = shaping
 
         #MODIFIED: ADDED
         located = False
+
         if (state[0] < x_right and state[0] > x_left):
+            # print("located")
             located = True
 
         reward -= (
@@ -648,17 +652,27 @@ class LunarLander(gym.Env, EzPickle):
         reward -= s_power * 0.03
         win = False
         terminated = False
-        if located and self.landed: #not self.lander.awake: #MODIFIED
+
+        if self.game_over or (abs(state[0]) >= 1.0):
+            # print("lose")
             terminated = True
-            reward = +100
+            reward += -100
+        if not self.lander.awake: #MODIFIED
+            # print("winish")
+            terminated = True
+            reward += +150
             win = True
-        elif self.game_over or (abs(state[0]) >= 1.0) or self.landed :
+
+        if located and not self.lander.awake: #MODIFIED
+            # print("win")
             terminated = True
-            reward = -100
-      
+            reward += +250
+            win = True
+
 
         if self.render_mode == "human":
             self.render()
+
         return np.array(state, dtype=np.float32), reward, terminated, win
 
     def render(self):

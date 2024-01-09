@@ -13,7 +13,7 @@ import csv
 import pygame
 from simplePG import SimplePG
 from lunar_lander import LunarLander
-from imports import demo_name, seed, steps, gamma, learning_rate, obs_size_values, num_actions,algorithm_name, env_name, episodes
+from imports import demo_name, seed, steps, gamma, exploration_type, greedy_e_epsilon, learning_rate, obs_size_values, num_actions,algorithm_name, env_name, episodes, trials
 
 
 env = LunarLander()
@@ -63,7 +63,7 @@ def run_train(trials):
 trains the agent with PG algorithm and preferred number of demonstrations
 """
 def train():
-    agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=0.1, random_seed=10)
+    agent = SimplePG(num_actions=num_actions, input_size=obs_size_values, hidden_layer_size=12, learning_rate=learning_rate, decay_rate=0.99, gamma=gamma, greedy_e_epsilon=greedy_e_epsilon, random_seed=10)
     
     avg_rewards_past, avg_steps_past, avg_accuracy_past = [],[],[]
     state = env.reset(seed=10)
@@ -76,7 +76,7 @@ def train():
         next_state=None
 
         for t in range(steps):
-            action = agent.pickAction(state, exploring=True)
+            action = agent.pickAction(state, exploring=True, exploration_type="decay")
             next_state, reward, done, win = env.step(action)
 
             if t == steps -1:
@@ -100,20 +100,39 @@ def train():
         # Updating the policy :
         agent.finishEpisode()
 
+        if exploration_type == "decay":
+            agent._explore_eps -= 1/5000
+
         if i_episode % 20 == 0:
             avg_accuracy_past.append(sum_wins/20)
             avg_rewards_past.append(running_reward/20)
             avg_steps_past.append(running_steps/20)
-            print('Episode {}\tlength: {}\treward: {}'.format(i_episode, t, running_reward/20))
+            print('Episode {}\tlength: {}\treward: {}\t accuracy: {}'.format(i_episode, t, running_reward/20, sum_wins/20))
+            if sum_wins/20 > 0.8:
+                break
             running_reward, running_steps, sum_wins = 0,0,0
 
         agent.updateParamters()
 
     assert(len(avg_rewards_past)==len(avg_steps_past)==len(avg_accuracy_past))
-
+    save_policy(agent)
     return avg_rewards_past, avg_steps_past, avg_accuracy_past
 
+def save_policy(agent):
+    env = LunarLander(render_mode="human")
 
+    for i in range(5):
+        state = env.reset()
+
+        for j in range(steps):
+            action = agent.pickAction(state, exploring=False)
+
+            #Return state, reward
+            new_state, reward, done, _ = env.step(action)
+
+            state = new_state
+            if done:
+                break
 """
 Saves training data to csv file
 """
@@ -123,7 +142,7 @@ def save_data(r,s,a):
     df.to_csv("./data/results/{}.csv".format(demo_name))
 
 if __name__ == "__main__":
-    run_train()
+    run_train(trials)
 
 
 #random_seed = 543

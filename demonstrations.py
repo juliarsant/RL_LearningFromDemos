@@ -48,7 +48,7 @@ def demonstrations_only():
 
     #for each demonstration desired
     for i_episode in range(0, num_demos):
-        time.sleep(2)
+        time.sleep(1)
         seed_ += i_episode
         timestamps, action_list = [], [] #timestamps
         running_reward = 0
@@ -151,5 +151,5 @@ def main(demo_name_):
     save_demo(demo, demo_name_)
 
 if __name__=="__main__":
-    #main(demo_name)
-    play_demonstrations(demo_name)
+    main(demo_name)
+    #play_demonstrations(demo_name)

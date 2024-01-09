@@ -96,12 +96,22 @@ class SimplePG(object):
 			print("Still nan!")
 		
 		
-		h[h<0] = 0 # ReLU nonlinearity
+		# h[h<0] = 0 # ReLU nonlinearity
+		# print("h: ", h)
 		logp = h.dot(self._model['W2'])
+		# print(logp)
+		logp *= 0.3
 
-		p = self.softmax(logp)
+		min = np.min(logp)
+		logp += abs(min)
+		max = np.max(logp)
+
+		logp /= max
+
+		# p = self.softmax(logp)
+		# return p, h
   
-		return p, h # return probability of taking actions, and hidden state
+		return logp, h # return probability of taking actions, and hidden state
 		
 	
 	def policy_backward(self, hs_stack, epdlogp):
@@ -109,7 +119,7 @@ class SimplePG(object):
 			epdlogp is the """
 		dW2 = hs_stack.T.dot(epdlogp)  
 		dh = epdlogp.dot(self._model['W2'].T)
-		dh[hs_stack <= 0] = 0 # backpro prelu
+		# dh[hs_stack <= 0] = 0 # backpro prelu
   
 		t = time.time()
   
@@ -129,7 +139,7 @@ class SimplePG(object):
 	# input: current state/observation
 	# output: action index
 	def pickAction(self, state_obs, exploring, exploration_type=None):
-
+		final_action = None
 		# feed input (x) through network and get output: action probability distribution and hidden layer
 		aprob, h = self.policy_forward(state_obs)
 		a2 = -1
@@ -138,10 +148,11 @@ class SimplePG(object):
 			# greedy-e exploration
 			rand_e = np.random.uniform()
 			if rand_e < self._explore_eps:
-				a2 = np.random.randint(4)
-
+				a2 = np.random.randint(0,4)
 				# set all actions to be equal probability
 				aprob[0] = [ 1.0/len(aprob[0]) for i in range(len(aprob[0]))]
+		# else:
+		# 	final_action = np.argmax(aprob)
 
 
 		if np.isnan(np.sum(aprob)):
@@ -159,13 +170,18 @@ class SimplePG(object):
 		self.a_probs.append(aprob)
 
 		#softmax loss gradient
-		dlogsoftmax = aprob.copy()
-		dlogsoftmax[0,a] -= 1 #-discounted reward WRONG
+		# dlogsoftmax = aprob.copy()
+		dlogsoftmax = self.softmax(aprob.copy())
+
+		# dlogsoftmax[0,a] -= 1 #-discounted reward WRONG
 		self._dlogps.append(dlogsoftmax)
 
 		if a2 > -1:
 			a = a2
 
+		if final_action is not None:
+			return final_action
+		
 		return a
 		
 	# after process_step, this function needs to be called to set the reward
@@ -200,11 +216,14 @@ class SimplePG(object):
 		# stack of agent action probabilities
 		agent_actions = np.vstack(self.a_probs)
 		
+		# print("a:",agent_actions)
+		# print("e: ", epdlogp)
 		# self.past_rewards is the stack of rewards from the episode
 		epr = np.vstack(self.past_rewards)
 
 		if human_demonstration:
 			human_actions = np.vstack(self.h_actions)
+			human_rewards = np.vstack(self.h_rewards)
 		
 		self.past_states,self.past_hidden_states,self._dlogps,self.past_rewards, self.h_actions, self.a_probs, self.h_rewards = [],[],[],[],[],[],[] # reset array memory
 
@@ -219,15 +238,23 @@ class SimplePG(object):
 
 		#Variance
 		discounted_epr_diff /= np.std(discounted_epr)
+
+		# print("epr: ", epr)
+		# print("dicount epr: ", discounted_epr_diff)
+		# print("epdlog: ", epdlogp)
 		
 		if not human_demonstration:
 			epdlogp *= discounted_epr_diff # modulate the gradient with advantage (PG magic happens right here.)
 		else:
-			scores = self.human_robot_agreement_score(agent_actions, human_actions, 4)
-			discounted_scores = self.discount_rewards(scores)
-			discounted_score_mean = np.mean(discounted_scores)
-			discounted_score_diff = np.subtract(discounted_scores,discounted_score_mean)
-			discounted_score_diff /= np.std(discounted_scores)
+			scores = self.human_robot_agreement_score(epdlogp, human_actions, 4)
+			discounted_score = self.discount_rewards(scores)
+			# discounted_score = self.discount_rewards(human_rewards)
+			discounted_score_mean = np.mean(discounted_score)
+			discounted_score_diff = np.subtract(discounted_score,discounted_score_mean)
+			discounted_score_diff /= np.std(discounted_score)
+
+			# print("score: ", discounted_score_diff)
+
 
 			epdlogp *=  discounted_score_diff # modulate the gradient with advantage (PG magic happens right here.)
 
@@ -253,11 +280,14 @@ class SimplePG(object):
 
 		for i in range(len(a_robot)):
 			score = 0
+			# print("human: ", a_human[i])
+			# print("robot: ", a_robot[i])
 			for j in range(num_actions):
+
 				if a_human[i][j] == 1.0:
-					score += 1.0 - abs(a_robot[i][j])
+					score += a_robot[i][j]
 				else:
-					score += 0
+					score -= a_robot[i][j]
 			score_list.append(score)
 
 		return np.vstack(score_list)
